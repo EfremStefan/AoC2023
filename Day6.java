@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Day6 {
@@ -40,19 +39,11 @@ public class Day6 {
                 }
             }
         }
-        //pt fiecare timp din lista
+        //pt fiecare timp din lista folosim functia calculateTimeSpanDistance care face un binary search
         for(int i = 0; i < times.size(); i++){
             int currTime = times.get(i);
             int currMaxDistance = distances.get(i);
-            int diffWaysToWin = 0;
-            //verificam ce distanta parcurgem cu formula distanta = acceleratia * timpul, unde j este acceleratia
-            // sau timpul petrecut accelerand
-            for(int j = 0; j < currTime; j++){
-                int distance = j * (currTime-j);
-                if(distance > currMaxDistance){
-                    diffWaysToWin++;
-                }
-            }
+            int diffWaysToWin = calculateTimeSpanDistance(currTime, currMaxDistance);
             result *= diffWaysToWin;
         }
 
@@ -70,22 +61,63 @@ public class Day6 {
                 sb.append(races);
             }
             // credeam ca inputul va fii prea mare si va trebui sa schimb din long
-            // intr-un tabel de cifre si sa lucrez pe el, se pare ca nu a fost nevoie
-            // o sa incerc sa vad daca pot face mai eficienta aceast parte
             if(twoParts[0].equals("Time")){
                 time = Long.parseLong(sb.toString());
             } else {
                 distance = Long.parseLong(sb.toString());
             }
         }
-        //similar cu part1, to be improved if possible
-        for(long j = 0; j < time; j++){
-            long distanceToTravel = j * (time-j);
-            if(distanceToTravel > distance){
-                result++;
+        //finally improved O(t) to O(log(t))
+        result = calculateTimeSpanDistance(time, distance);
+        return result;
+    }
+
+    // functie ajutatoare care face un dublu binary search
+    // Ne intereseaza primul timp care este mai mare decat cel maxim din input si al ultimul
+    //fiecare se afla in cele doua jumatati ale timpilor, unde maximum este mereu la mijloc
+    //astfel facem un binary search pe prima jumatate ca sa aflam primul timp care trece de record-ul anterior
+    // si un binary search invers, deoarece a doua parte de array este descrescatoare, ca sa aflam al doilea
+    private static int calculateTimeSpanDistance(long currTime, long currMaxDistance) {
+        // classic binary search pt prima jumatate
+        long left = 0;
+        long right = currTime/2;
+        while(left + 1 < right){
+            long mid = (left + right)/2;
+            long distance = distanceTraveledForAcceleration(mid, currTime);
+            if(distance == currMaxDistance){
+                break;
+            }
+            if( distance > currMaxDistance){
+                right = mid;
+            } else {
+                left = mid;
             }
         }
-        return result;
+        long firstMaxPosition = right;
+
+        // al doilea binary search este facut invers deoarece a doua jumatate este descrescatoare
+        left = currTime/2 + 1;
+        right = currTime;
+        while(left + 1 < right){
+            long mid = (left + right)/2;
+            long distance = distanceTraveledForAcceleration(mid, currTime);
+            if(distance == currMaxDistance){
+                break;
+            }
+            if(distance >= currMaxDistance){
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        long secondMaxPosition = left;
+        //returnam diferenta si acesta este rezultatul pe aceasta cursa
+        return (int) (secondMaxPosition - firstMaxPosition + 1);
+    }
+
+    // functie ajutatoare pt calcularea distantei
+    private static long distanceTraveledForAcceleration(long acceleration, long allTime){
+        return acceleration * (allTime - acceleration);
     }
 
 
