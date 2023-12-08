@@ -185,7 +185,7 @@ public class Day8 {
             }
         }
         // folosim o functie simpla de lowestCommonMultiplier pt a gasi LCM de ciclurile gasite la pasul anterior
-        long lcmOfCycles = lowestCommonMultiplier(timesTookToHitZ);
+        long lcmOfCycles = lowestCommonMultiple(timesTookToHitZ);
 
         //return the result, aici se vede ca numarul este prea mare pentru a putea itera de atatea ori cu toate pozitiile de start
         // 10151663816849
@@ -194,7 +194,7 @@ public class Day8 {
         return lcmOfCycles;
     }
 
-    private static long lowestCommonMultiplier(Map<String, Integer> timesTookToHitZ) {
+    private static long lowestCommonMultiple(Map<String, Integer> timesTookToHitZ) {
         long lcm = 1;
         for(Map.Entry<String, Integer> entry : timesTookToHitZ.entrySet()){
             lcm = (entry.getValue() * lcm)/ greatestCommonDivisor(entry.getValue(), lcm);
